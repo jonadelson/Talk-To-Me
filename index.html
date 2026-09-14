@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Talk To Me</title>
+  <meta name="description" content="A private, offline journal for logging thoughts and feelings.">
+  <meta name="theme-color" content="#3d5a80">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Talk To Me">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Talk To Me</h1>
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-view="log" role="tab" aria-selected="true">Log</button>
+      <button class="tab" data-view="history" role="tab" aria-selected="false">History</button>
+      <button class="tab" data-view="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- LOG VIEW -->
+    <section id="view-log" class="view is-active" aria-labelledby="log-heading">
+      <h2 id="log-heading" class="visually-hidden">Log a thought</h2>
+      <form id="entry-form" autocomplete="off">
+        <label class="field">
+          <span class="label">What's on your mind?</span>
+          <textarea id="thought" name="thought" rows="5" placeholder="Write the thought as it came to you…" required></textarea>
+        </label>
+
+        <fieldset class="field">
+          <legend class="label">How do you feel right now?</legend>
+          <div class="mood-row" id="mood-row">
+            <label class="mood"><input type="radio" name="mood" value="1"><span>😞</span><small>Awful</small></label>
+            <label class="mood"><input type="radio" name="mood" value="2"><span>🙁</span><small>Low</small></label>
+            <label class="mood"><input type="radio" name="mood" value="3" checked><span>😐</span><small>Okay</small></label>
+            <label class="mood"><input type="radio" name="mood" value="4"><span>🙂</span><small>Good</small></label>
+            <label class="mood"><input type="radio" name="mood" value="5"><span>😄</span><small>Great</small></label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="label">Intensity <output id="intensity-out">5</output>/10</span>
+          <input type="range" id="intensity" name="intensity" min="1" max="10" value="5">
+        </label>
+
+        <label class="field">
+          <span class="label">Feelings <small class="muted">(comma separated, optional)</small></span>
+          <input type="text" id="feelings" name="feelings" placeholder="anxious, tired, hopeful…" list="feelings-list">
+          <datalist id="feelings-list"></datalist>
+        </label>
+
+        <details class="field more">
+          <summary>Go deeper (optional)</summary>
+          <label class="field">
+            <span class="label">What was happening?</span>
+            <textarea id="situation" name="situation" rows="2" placeholder="Where were you, who was there, what triggered it?"></textarea>
+          </label>
+          <label class="field">
+            <span class="label">Evidence for / against this thought</span>
+            <textarea id="evidence" name="evidence" rows="3" placeholder="What supports it? What doesn't?"></textarea>
+          </label>
+          <label class="field">
+            <span class="label">A more balanced way to see it</span>
+            <textarea id="reframe" name="reframe" rows="3" placeholder="What would you tell a friend who had this thought?"></textarea>
+          </label>
+        </details>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="save-btn">Save thought</button>
+          <button type="button" class="btn" id="clear-btn">Clear</button>
+        </div>
+        <p id="save-status" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- HISTORY VIEW -->
+    <section id="view-history" class="view" aria-labelledby="history-heading">
+      <h2 id="history-heading" class="visually-hidden">History</h2>
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="Search thoughts…" aria-label="Search thoughts">
+        <select id="mood-filter" aria-label="Filter by mood">
+          <option value="">All moods</option>
+          <option value="1">😞 Awful</option>
+          <option value="2">🙁 Low</option>
+          <option value="3">😐 Okay</option>
+          <option value="4">🙂 Good</option>
+          <option value="5">😄 Great</option>
+        </select>
+      </div>
+      <p id="history-summary" class="muted"></p>
+      <ul id="entries" class="entries"></ul>
+      <p id="empty-state" class="empty" hidden>No thoughts logged yet. Your entries will appear here.</p>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section id="view-settings" class="view" aria-labelledby="settings-heading">
+      <h2 id="settings-heading">Settings</h2>
+
+      <div class="card">
+        <h3>Your data</h3>
+        <p class="muted">Everything stays on this device. Nothing is sent anywhere. Export regularly if you want a backup or to share with your therapist.</p>
+        <div class="actions">
+          <button type="button" class="btn" id="export-json">Export JSON</button>
+          <button type="button" class="btn" id="export-text">Export as text</button>
+          <label class="btn file-btn">Import JSON<input type="file" id="import-file" accept="application/json,.json" hidden></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Install</h3>
+        <p class="muted" id="install-hint">Install this app to your home screen so it opens like a native app and works offline.</p>
+        <button type="button" class="btn primary" id="install-btn" hidden>Install app</button>
+      </div>
+
+      <div class="card danger">
+        <h3>Delete everything</h3>
+        <p class="muted">Removes all entries from this device. This cannot be undone.</p>
+        <button type="button" class="btn danger" id="delete-all">Delete all entries</button>
+      </div>
+
+      <p class="muted small">Talk To Me is a personal journaling tool, not a substitute for professional care. If you are in crisis, please contact local emergency services or a crisis line.</p>
+    </section>
+  </main>
+
+  <!-- Edit dialog -->
+  <dialog id="edit-dialog">
+    <form method="dialog" id="edit-form">
+      <h3>Edit entry</h3>
+      <label class="field"><span class="label">Thought</span><textarea id="edit-thought" rows="4" required></textarea></label>
+      <label class="field"><span class="label">Feelings</span><input type="text" id="edit-feelings"></label>
+      <label class="field"><span class="label">What was happening?</span><textarea id="edit-situation" rows="2"></textarea></label>
+      <label class="field"><span class="label">Evidence for / against</span><textarea id="edit-evidence" rows="2"></textarea></label>
+      <label class="field"><span class="label">A more balanced view</span><textarea id="edit-reframe" rows="2"></textarea></label>
+      <div class="actions">
+        <button type="submit" class="btn primary" value="save">Save</button>
+        <button type="button" class="btn" id="edit-cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
